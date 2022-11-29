@@ -1,0 +1,15 @@
+package gallery;
+
+import java.awt.Graphics;
+
+import javax.swing.JButton;
+
+//JButton 현재 우리의 상황에 맞지 않기 때문에
+//우리가 원하는 버튼으로 그림을 재정의 하기 위함
+public class CoustomButton extends JButton {
+	protected void paintComponent(Graphics g) {
+		g.fillOval(0, 0, 20, 20);
+	
+	}
+	
+}

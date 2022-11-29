@@ -1,0 +1,18 @@
+package download;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JProgressBar;
+
+public class ProgressBarTest extends JFrame {
+	JProgressBar bar1, bar2;
+	JButton bt;
+	
+	public ProgressBarTest() {
+		
+	}
+	
+	public static void main(String[] args) {
+		new ProgressBarTest();
+	}
+}

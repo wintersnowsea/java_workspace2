@@ -1,0 +1,13 @@
+package page;
+
+public class MySQLTest {
+	
+	public static void main(String[] args) {
+		//Mysql용 드라이버를 로드하자
+		try {
+			Class.forName("com.mysql.jdbc.Driver"); //클래스 로드!! static 원본코드....
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+}

@@ -1,0 +1,6 @@
+package boardmodel;
+
+//오라클의 Board 테이블에 관한 정보를 가진 모델 객체
+public class BoardModel {
+
+}

@@ -1,0 +1,12 @@
+package page;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
+//어플리케이션에서 사용할 네비게이션 메뉴를 클래스로 정의한다
+//JLabel를 커스터마이징하자
+public class Menu extends JLabel{
+	public Menu(ImageIcon icon, int width, int heigth) {
+		this.setIcon();
+	}
+}

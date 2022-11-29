@@ -1,0 +1,12 @@
+package page;
+
+import java.awt.Color;
+
+import javax.swing.JPanel;
+
+//회사소개의 내용을 보여줄 페이지
+public class MemberPage extends JPanel {
+	public MemberPage() {
+		this.setBackground(Color.pink);
+	}
+}

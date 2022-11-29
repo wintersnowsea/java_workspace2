@@ -1,0 +1,54 @@
+package image;
+
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.lang.reflect.Method;
+import java.net.URL;
+
+import javax.imageio.ImageIO;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+//자바에서 이미지를 얻는 방법은 번거로운 Toolkit만 있는것이 아니다!!
+//사용중인 OS의 디렉토리를 명시하는 것보다 클래스패스를 통한 차원접근이 더 자바스럽고,
+//플랫폼에 중립적이다
+//따라서 자원들도 package에 담을 수 있다
+public class HeroControl extends JFrame {
+	JPanel p;
+	Image image;
+	
+	public HeroControl() {
+		/*//클래스에 대한 정보를 가진 클래스
+		Class myClass=this.getClass();
+		Method[] methods=myClass.getMethods();
+		for(Method m : methods) {
+			System.out.println(m.getName());
+		}*/
+		 //현재 클래스에 대한 정보를 가진 클래스를 얻는다
+		Class myClass=this.getClass();
+		URL url=null; //자원의 위치를 의미, 패키지경로도 처리가능
+		
+		//image=ImageIO.read(url); //이미지얻기
+		
+		p=new JPanel() {
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2= (Graphics2D)g;
+				
+				//g2.drawImage(getIconImage(), EXIT_ON_CLOSE, DISPOSE_ON_CLOSE, WIDTH, HEIGHT, rootPane)
+			}
+		};
+		add(p);
+		
+		
+		setSize(800,600);
+		setVisible(true);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setLocationRelativeTo(null); //화면중앙에 프레임놓기
+	}
+	
+	
+	public static void main(String[] args) {
+		new HeroControl();
+	}
+}

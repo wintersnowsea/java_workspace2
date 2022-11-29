@@ -1,0 +1,85 @@
+package page;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import util.ImageManager;
+
+public class AppMain extends JFrame{
+	
+	JPanel p_north; //네비게이션 버튼을 올려놓을 북쪽 패널
+	//JButton[] menu=new JButton[4];
+	JLabel[] menu=new JLabel[4];
+	ImageManager imageManager;
+	String[] path= {
+			"res/app/company.png",
+			"res/app/member.png",
+			"res/app/login.png",
+			"res/app/notice.png",
+	}; //이미지아이콘을 담아 놓을 배열
+	//우리가 사용할 페이지들이 공존할 수 있도록
+	//FlowLayout을 적용할 영역때문에 프레임의 센터에 부착될 것임(대왕만하게)
+	JPanel p_center;
+	
+	//우리가 사용할 페이지들
+	CompanyPage companyPage;
+	MemberPage memberPage;
+	LoginPage loginPage;
+	NoticePage noticePage;
+	
+	//모든 페이지의 너비와 높이의 기준을 정한 상수정의
+	public static final int PAGE_WIDTH=800;
+	public static final int PAGE_HEIGHT=100;
+	
+	public AppMain() {
+		p_north=new JPanel();
+		p_north.setBackground(Color.YELLOW);
+		imageManager=new ImageManager();
+		
+		//아이콘이 있는 버튼들을 생성한다!!
+		for(int i=0;i<menu.length;i++) {
+			menu[i]=new JLabel(imageManager.getIcon(path[i],60,60));
+			p_north.add(menu[i]);
+			menu[i].addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					System.out.println("눌렀어?");
+				}
+			});
+		}
+		
+		//센터에 붙을 패널 생성
+		p_center=new JPanel();
+		p_center.setBackground(Color.GRAY );
+		
+		//4개의 페이지를 미리 화면에 생성하여 붙이기
+		companyPage=new CompanyPage();
+		memberPage=new MemberPage();
+		loginPage=new LoginPage();
+		noticePage=new NoticePage();
+		
+		//생성된 페이지들을 센터 p_center 패널에 붙이자
+		p_center.add(companyPage);
+		p_center.add(memberPage);
+		p_center.add(loginPage);
+		p_center.add(noticePage);
+		
+		add(p_north, BorderLayout.NORTH); //북쪽에 패널 붙이기
+		add(p_center); //센터에 붙이기
+		
+		
+		//화면에 띄우기
+		setSize(800,500);
+		setVisible(true);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+	}
+	
+	public static void main(String[] args) {
+		new AppMain();
+	}
+}

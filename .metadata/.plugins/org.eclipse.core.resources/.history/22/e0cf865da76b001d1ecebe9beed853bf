@@ -1,0 +1,19 @@
+package page;
+
+import java.awt.Dimension;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
+//어플리케이션에서 사용할 네비게이션 메뉴를 클래스로 정의한다
+//JLabel를 커스터마이징하자
+public class Menu extends JLabel{
+	int index;
+	
+	public Menu(ImageIcon icon, int width, int height, int index) {
+		this.index=index;
+		System.out.println("태어날 때 받은 번호는 "+index);
+		this.setIcon(icon); //라벨에 사용할 아이콘
+		this.setPreferredSize(new Dimension(width, height)); //라벨의 크기
+	}
+}

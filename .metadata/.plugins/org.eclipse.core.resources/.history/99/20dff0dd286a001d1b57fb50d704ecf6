@@ -1,0 +1,16 @@
+package image;
+
+//자바에서 이미지를 얻는 방법은 번거로운 Toolkit만 있는것이 아니다!!
+//사용중인 OS의 디렉토리를 명시하는 것보다 클래스패스를 통한 차원접근이 더 자바스럽고,
+//플랫폼에 중립적이다
+//따라서 자원들도 package에 담을 수 있다
+public class HeroControl {
+	public HeroControl() {
+		//클래스에 대한 정보를 가진 클래스
+		Class myClass;
+		
+	}
+	public static void main(String[] args) {
+	
+	}
+}

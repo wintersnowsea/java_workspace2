@@ -1,0 +1,25 @@
+package db;
+
+//오라클에 접속하여 emp 테이블의 레코드를 가져와보자!!
+public class SelectTest {
+
+	public static void main(String[] args) throws ClassNotFoundException {
+		/* Java DataBase Connectivity : 자바기반의 데이터베이스 연동 기술(개념)
+		 * java.sql 패키지에서 지원함
+		 JDBC기반의 DB 연동 절차
+		 1) 드라이버 로드(사용하고자 하는 DBMS제품에 맞는...)
+		 	java언어가 해당 DB제품을 핸들링 하기 위한 라이브러리
+		 2) 접속
+		 3) 쿼리실행
+		 4) DB관련 자원해제 (스트림과 DB는 개발자가 반드시 닫아야함)
+		  */
+		//인스턴스를 올리는 것이 아니라, static 영역으로 지정한
+		//드라이버 클래스를 Load 한다!!
+		try {
+			Class.forName("oracle.jdbc.driver.OracleDriver");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+}

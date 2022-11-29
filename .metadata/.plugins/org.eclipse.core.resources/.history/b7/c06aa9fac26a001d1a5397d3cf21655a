@@ -1,0 +1,17 @@
+package basic;
+
+public class ThreadTest2 {
+	public static void main(String[] args) {
+		for(int i=0;i<100;i++) {
+			System.out.println(i);
+		}
+		
+		//개발자가 정의한 쓰레드 생성
+		Thread t=new Thread() {
+			public void run() {
+				System.out.println("A");
+			}
+		};
+		t.start();
+	}
+}

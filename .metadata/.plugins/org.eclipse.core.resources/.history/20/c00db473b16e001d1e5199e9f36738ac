@@ -1,0 +1,28 @@
+package tablemodel;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+
+//JTable에서 TableModel 사용이 상당히 큰 비중을 차지하는 데,
+//왜 사용해야하는지를 이해하기 위한 예제
+//사용했을경우와 사용하지 않았을 경우를 비교
+public class AppMain extends JFrame {
+	JTable table;
+	JScrollPane scroll; //스크롤을 이용해야 컬럼 제목이 노출된다
+	
+	
+	public AppMain() {
+		table=new JTable();
+		scroll=new JScrollPane(table);
+		add(scroll);
+		
+		setSize(0,400);
+		setVisible(true);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+	}
+	
+	public static void main(String[] args) {
+		new AppMain();
+	}
+}

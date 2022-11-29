@@ -1,0 +1,52 @@
+package download;
+
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JProgressBar;
+
+public class DownLoader extends JFrame {
+	JProgressBar bar;
+	JButton bt_open, bt_down;
+	JFileChooser chooser; //파일탐색기 관리 객체
+	
+	public DownLoader() {
+		bar=new JProgressBar();
+		bt_open = new JButton("파일 찾기");
+		bt_down = new JButton("다운로드");
+		chooser = new JFileChooser();
+		
+		
+		//스타일 적용
+		bar.setPreferredSize(new Dimension(580,120));
+		
+		setLayout(new FlowLayout());
+		add(bar);
+		add(bt_open);
+		add(bt_down);
+		
+		setSize(600,200);
+		setVisible(true);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		bt_open.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openfile();
+			}
+		});
+	}
+	
+	public void openfile() {
+		chooser.showOpenDialog(this);
+	}
+	
+	public static void main(String[] args) {
+		new DownLoader();
+	}
+
+}

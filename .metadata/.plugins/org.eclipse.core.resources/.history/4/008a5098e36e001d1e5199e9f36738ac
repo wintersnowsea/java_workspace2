@@ -1,0 +1,39 @@
+package boardmodel;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import javax.swing.table.AbstractTableModel;
+
+//오라클의 Board 테이블에 관한 정보를 가진 모델 객체
+public class BoardModel extends AbstractTableModel{
+	
+	BoardMain boardMain;
+	
+	public BoardModel() {
+		
+		select();
+	}
+	public void select() {
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		
+		String sql="select * from board order by board_id desc";
+	}
+	
+	@Override
+	public int getRowCount() {
+		return 7;
+	}
+
+	@Override
+	public int getColumnCount() {
+		return 3;
+	}
+
+	@Override
+	public Object getValueAt(int rowIndex, int columnIndex) {
+		return "♥";
+	}
+
+}

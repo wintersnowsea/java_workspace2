@@ -1,0 +1,12 @@
+package page;
+
+import java.awt.Color;
+
+import javax.swing.JPanel;
+
+//회사소개의 내용을 보여줄 페이지
+public class LoginPage extends JPanel {
+	public LoginPage() {
+		this.setBackground(Color.CYAN);
+	}
+}

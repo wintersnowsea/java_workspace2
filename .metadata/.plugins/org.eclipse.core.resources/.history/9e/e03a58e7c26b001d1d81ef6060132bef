@@ -1,0 +1,24 @@
+package page;
+
+import java.sql.DriverManager;
+
+public class MySQLTest {
+	
+	public static void main(String[] args) {
+		//Mysql용 드라이버를 로드하자
+		try {
+			Class.forName("com.mysql.jdbc.Driver"); //클래스 로드!! static 원본코드....
+			System.out.println("mysql용 드라이버 로드 성공");
+			
+			//접속시도!!!
+			String url="jdbc:mysql://localhost:3306/java";
+			String user="root";
+			String pass="1234";
+			
+			DriverManager.getConnection(url, user, pass);
+			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+}

@@ -1,0 +1,42 @@
+package tablemodel;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+
+//JTable에서 TableModel 사용이 상당히 큰 비중을 차지하는 데,
+//왜 사용해야하는지를 이해하기 위한 예제
+//사용했을경우와 사용하지 않았을 경우를 비교
+/* JDBC 프로그래밍 절차
+1) 드라이버 로드
+2) 접속
+3) 쿼리문
+4) 자원해제 
+ * */
+public class AppMain extends JFrame {
+	JTable table;
+	JScrollPane scroll; //스크롤을 이용해야 컬럼 제목이 노출된다
+	String[][] data; //emp연동 예정
+	String[] column= {"EMPNO","ENAME","JOB","MGR","HIREDATE","SAL","COMM","DEPTNO"};
+	
+	public AppMain() {
+		//오라클 연동하기!!
+		connect(); //오라클 접속
+		table=new JTable();
+		scroll=new JScrollPane(table);
+		add(scroll);
+		
+		setSize(600,400);
+		setVisible(true);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+	}
+	
+	//오라클 접속하기
+	public void connect() {
+		
+	}
+	
+	public static void main(String[] args) {
+		new AppMain();
+	}
+}

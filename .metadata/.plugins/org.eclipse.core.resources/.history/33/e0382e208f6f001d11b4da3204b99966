@@ -1,0 +1,6 @@
+package util;
+
+//스트링과 관련된 유용한 처리를 위한 클래스
+public class StringUtil {
+
+}
