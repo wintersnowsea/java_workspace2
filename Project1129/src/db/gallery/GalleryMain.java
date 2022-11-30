@@ -29,6 +29,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -50,6 +51,10 @@ public class GalleryMain extends JFrame implements ActionListener{
 	
 	//센터영역
 	JTable table;
+	
+	
+	
+	
 	JScrollPane scroll;
 	
 	//동쪽영역
@@ -71,6 +76,7 @@ public class GalleryMain extends JFrame implements ActionListener{
 	//DB관련
 	Connection con;
 	GalleryModel model;
+	int selected_id;
 	
 	ArrayList<int[]> history=new ArrayList<int[]>();
 	SignModel signModel; //has a 관계
@@ -283,6 +289,7 @@ public class GalleryMain extends JFrame implements ActionListener{
 		}
 	}
 	
+	//등록하기
 	public void regist() {
 		copy(); //이미지 복사
 		int result=model.insert(t_title.getText(), t_writer.getText(), t_content.getText(), filename);//오라클 등록
@@ -299,6 +306,28 @@ public class GalleryMain extends JFrame implements ActionListener{
 		}
 	}
 	
+	//수정하기
+	public void edit() {
+		if(JOptionPane.showConfirmDialog(this, "수정하시겠어요?")==JOptionPane.OK_OPTION) {
+			int result=model.update(t_title2.getText(), t_writer2.getText(), t_content2.getText(), selected_id);
+			if(result>0) {
+				model.selectAll();
+				table.updateUI();
+			}			
+		}
+	}
+	
+	//삭제하기
+	public void del() {
+		if(JOptionPane.showConfirmDialog(this, "삭제하시겠어요?")==JOptionPane.OK_OPTION) {
+			int result=model.delete(selected_id);
+			if(result>0) {
+				model.selectAll();
+				table.updateUI();
+			}
+		}
+	}
+	
 	public void actionPerformed(ActionEvent e) {
 		Object obj=e.getSource();
 		if(obj==bt_open) {
@@ -306,9 +335,9 @@ public class GalleryMain extends JFrame implements ActionListener{
 		}else if(obj==bt_regist) {
 			regist();
 		}else if(obj==bt_edit) {
-			
+			edit();
 		}else if(obj==bt_del) {
-			
+			del();
 		}
 	}
 	
@@ -377,6 +406,7 @@ public class GalleryMain extends JFrame implements ActionListener{
 	
 	//동쪽영역에 사용자가 선택한 레코드 1건을 출력한다!
 	public void getDetail(String[] record) {
+		selected_id=Integer.parseInt(record[0]);
 		t_title2.setText(record[1]);
 		t_writer2.setText(record[2]);
 		t_content2.setText(record[3]);
@@ -389,6 +419,7 @@ public class GalleryMain extends JFrame implements ActionListener{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		 
 	}
 	
 	public static void main(String[] args) {

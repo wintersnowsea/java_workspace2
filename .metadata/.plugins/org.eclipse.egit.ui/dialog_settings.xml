@@ -23,6 +23,16 @@
 		<item key="sortItemState" value="false"/>
 	</section>
 	<section name="GitCommitMessageComponent">
+		<list key="C:\java_workspace2\.git">
+			<item value="false"/>
+			<item value="해영 &lt;godud425@naver.com&gt;"/>
+			<item value="22.11.29"/>
+			<item value="해영 &lt;godud425@naver.com&gt;"/>
+			<item value="b27124f81a4cac0d0f815b2688e5a8845ad2f8b2"/>
+			<item value="0"/>
+			<item value="false"/>
+			<item value=""/>
+		</list>
 	</section>
 	<section name="org.eclipse.egit.ui.internal.push.PushResultDialog.dialogBounds">
 		<item key="DIALOG_X_ORIGIN" value="154"/>

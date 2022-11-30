@@ -52,4 +52,21 @@ public class ImageManager {
 			
 			return icon;
 		}
+		
+		/*-------------------------------------------------------------
+		 * 이미지 얻어오기
+		 * Image.SCALE_SMOOTH : 부드러움 강조
+		 * -------------------------------------------------------------*/
+		public Image getImage(String path, int width, int height) {
+			URL url=this.getClass().getClassLoader().getResource(path);
+			Image image=null;
+			try {
+				image=ImageIO.read(url);
+				image=image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			return image;
+		}
 }

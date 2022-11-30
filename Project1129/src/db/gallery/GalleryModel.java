@@ -67,6 +67,7 @@ public class GalleryModel extends AbstractTableModel {
 		try {
 			pstmt=galleryMain.con.prepareStatement(sql);
 			result=pstmt.executeUpdate(); //쿼리수행
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}finally {
@@ -76,13 +77,41 @@ public class GalleryModel extends AbstractTableModel {
 	}
 	
 	//update
-	public void update() {
+	public int update(String title, String writer, String content, int gallery_id) {
+		PreparedStatement pstmt=null;
+		
+		String sql="update gallery set title='"+title+"', writer='"+writer+"', content='"+content+"'";
+		sql+=" where gallery_id="+gallery_id;
+		
+		int result=0;
+		try {
+			pstmt=galleryMain.con.prepareStatement(sql);
+			result=pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			galleryMain.release(pstmt);
+		}
+		return result;
 		
 	}
 	
 	//delete
-	public void delete() {
+	public int delete(int gallery_id) {
+		PreparedStatement pstmt=null;
 		
+		String sql="delete gallery where gallery_id="+gallery_id;
+		
+		int result=0;
+		try {
+			pstmt=galleryMain.con.prepareStatement(sql);
+			result=pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			galleryMain.release(pstmt);
+		}
+		return result;
 	}
 	
 	public int getRowCount() {

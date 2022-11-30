@@ -1,9 +1,0 @@
-package basic;
-
-public class ThreadTest2 {
-	public static void main(String[] args) {
-		for(int=0;i<100;i++) {
-			System.out.println(i);
-		}
-	}
-}

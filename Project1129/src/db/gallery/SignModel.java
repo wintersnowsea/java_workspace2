@@ -20,6 +20,7 @@ public class SignModel {
 		try {
 			pstmt=galleryMain.con.prepareStatement(sql);
 			int result=pstmt.executeUpdate(); //쿼리수행
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}finally {
