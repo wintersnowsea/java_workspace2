@@ -8,6 +8,11 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,7 +20,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -35,6 +43,7 @@ public class GalleryMain extends JFrame implements ActionListener{
 	JTextField t_title;
 	JTextField t_writer;
 	JTextArea t_content;
+	JPanel p_sign; //사인처리할 패널
 	JPanel p_preview; //이미지 미리보기 패널
 	JButton bt_open; //첨부 이미지 찾기
 	JButton bt_regist;
@@ -54,20 +63,41 @@ public class GalleryMain extends JFrame implements ActionListener{
 	
 	JFileChooser chooser;
 	Image image; //패널이 그릴 수 있도록 멤버변수로 선언함
+	Image detailImage; //우측 패널에서 그려질 이미지
 	File file; //유저가 탐색기를 통해 선택한 바로 그 파일
 	String dir="C:/java_workspace2/data/project1129/images";
 	String filename; //개발자가 새롭게 정의한 파일명
 	
 	//DB관련
 	Connection con;
+	GalleryModel model;
+	
+	ArrayList<int[]> history=new ArrayList<int[]>();
+	SignModel signModel; //has a 관계
 	
 	public GalleryMain() {
 		connect();
+		
+		signModel=new SignModel(this);
+		
 		//서쪽영역
 		p_west=new JPanel();
 		t_title=new JTextField(12);
 		t_writer=new JTextField(12);
 		t_content=new JTextArea();
+		p_sign=new JPanel() {
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2=(Graphics2D)g;
+				
+				g2.clearRect(0, 0, 140, 70);
+				
+				g2.setColor(Color.RED);
+				for(int i=0;i<history.size();i++) {
+					int[] dot=history.get(i);
+					g2.fillOval(dot[0], dot[1], 3, 3);					
+				}
+			}
+		};
 		p_preview=new JPanel() {
 			@Override
 			protected void paintComponent(Graphics g) {
@@ -76,7 +106,7 @@ public class GalleryMain extends JFrame implements ActionListener{
 				g2.fillRect(0, 0, 150, 130);
 				
 				g2.setColor(Color.WHITE);
-				g2.drawString("choose your file", 20, 60);
+				g2.drawString("choose your file", 28, 70);
 				if(image != null) {
 					g2.drawImage(image, 0, 0, 150, 130, GalleryMain.this);					
 				}
@@ -86,14 +116,15 @@ public class GalleryMain extends JFrame implements ActionListener{
 		bt_regist=new JButton("등록");
 		chooser=new JFileChooser();
 		
+		t_content.setPreferredSize(new Dimension(140, 70));
+		p_sign.setPreferredSize(new Dimension(140,70));
+		p_preview.setPreferredSize(new Dimension(140, 130));
 		p_west.setPreferredSize(new Dimension(150, 500));
-		t_content.setPreferredSize(new Dimension(150, 130));
-		t_content.setBackground(Color.PINK);
-		p_preview.setPreferredSize(new Dimension(150, 130));
 		
 		p_west.add(t_title);
 		p_west.add(t_writer);
 		p_west.add(t_content);
+		p_west.add(p_sign);
 		p_west.add(p_preview);
 		p_west.add(bt_open);
 		p_west.add(bt_regist);
@@ -101,7 +132,7 @@ public class GalleryMain extends JFrame implements ActionListener{
 		add(p_west,BorderLayout.WEST);
 		
 		//센터영역
-		table=new JTable();
+		table=new JTable(model=new GalleryModel(this));
 		scroll=new JScrollPane(table);
 		
 		add(scroll);
@@ -111,13 +142,19 @@ public class GalleryMain extends JFrame implements ActionListener{
 		t_title2=new JTextField(12);
 		t_writer2=new JTextField(12);
 		t_content2=new JTextArea();
-		p_preview2=new JPanel();
+		p_preview2=new JPanel() {
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2=(Graphics2D)g;
+				g2.clearRect(0, 0, 150, 130); //싹 지우고
+				g2.drawImage(detailImage, 0, 0, 150, 130, GalleryMain.this);
+				
+			}
+		};
 		bt_edit=new JButton("수정");
 		bt_del=new JButton("삭제");
 		p_east.setPreferredSize(new Dimension(150, 500));
-		t_content2.setPreferredSize(new Dimension(150, 130));
-		t_content2.setBackground(Color.PINK);
-		p_preview2.setPreferredSize(new Dimension(150, 130));
+		t_content2.setPreferredSize(new Dimension(140, 130));
+		p_preview2.setPreferredSize(new Dimension(140, 130));
 		p_preview2.setBackground(Color.GRAY);
 		
 		p_east.add(t_title2);
@@ -131,13 +168,51 @@ public class GalleryMain extends JFrame implements ActionListener{
 		
 		setSize(900,500);
 		setVisible(true);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		//setDefaultCloseOperation(EXIT_ON_CLOSE);
 		
 		//버튼 리스너 연결
 		bt_open.addActionListener(this);
 		bt_regist.addActionListener(this);
 		bt_edit.addActionListener(this);
 		bt_del.addActionListener(this);
+		
+		//윈도우와 리스너 연결
+		this.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				release(con);
+				System.exit(0);
+			}
+		});
+		
+		//테이블과 리스너 연결
+		table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				table.setSelectionBackground(Color.YELLOW);
+				
+				//일차원 배열 추출하기
+				int row=table.getSelectedRow(); //유저가 선택한 row
+				String[] record=model.data[row]; //하나의 게시물 추출
+				
+				getDetail(record);
+			}
+		});
+		
+		//p_sign과 마우스 리스너연결
+		p_sign.addMouseMotionListener(new MouseMotionListener() {
+			public void mouseMoved(MouseEvent e) {
+				
+			}
+			
+			public void mouseDragged(MouseEvent e) {
+				int x=e.getX();
+				int y=e.getY();
+				System.out.println("x="+x+", y="+y);
+				int[] dot= {x, y}; //한 점을 표현할 배열
+				history.add(dot); //리스트에 추가
+				p_sign.repaint();
+			}
+		});
 	}
 
 	public void openFile() {
@@ -157,6 +232,7 @@ public class GalleryMain extends JFrame implements ActionListener{
 				filename=time+"."+StringUtil.getExtend(file.getName());
 				System.out.println(filename);
 				
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -174,11 +250,14 @@ public class GalleryMain extends JFrame implements ActionListener{
 			fos=new FileOutputStream(dir+"/"+filename);
 			
 			int data=-1; //읽혀지지 않았다는 초기값
+			
+			byte[] buff=new byte[1024];
+			
 			while(true) {
-				data=fis.read();
+				data=fis.read(buff);
 				if(data==-1)break;
 				//break문 아래 쪽은 break문을 만나지 않은 유요한 영역이다
-				fos.write(data);
+				fos.write(buff);//출력
 				System.out.println(data);//읽혀진 데이터
 			}
 			System.out.println("복사완료");
@@ -206,7 +285,18 @@ public class GalleryMain extends JFrame implements ActionListener{
 	
 	public void regist() {
 		copy(); //이미지 복사
-		//insert();//오라클 등록
+		int result=model.insert(t_title.getText(), t_writer.getText(), t_content.getText(), filename);//오라클 등록
+		
+		//사인 정보 입력
+		for(int i=0;i<history.size();i++) {
+			int[] dot=history.get(i);
+			signModel.insert(dot[0], dot[1], result);			
+		}
+		
+		if(result>0) {
+			model.selectAll();
+			table.updateUI();
+		}
 	}
 	
 	public void actionPerformed(ActionEvent e) {
@@ -233,7 +323,9 @@ public class GalleryMain extends JFrame implements ActionListener{
 			String pass="1234";
 			con=DriverManager.getConnection(url, user, pass);
 			if(con != null){
-				this.setTitle("오라클 접속 성공됨");
+				this.setTitle("오라클 접속 성공");
+			}else {
+				this.setTitle("오라클 접속 실패");
 			}
 			
 		} catch (ClassNotFoundException e) {
@@ -243,8 +335,60 @@ public class GalleryMain extends JFrame implements ActionListener{
 		}
 	}
 	
-	public void release() {
+	//윈도우와 리스너 연결시 사용
+	public void release(Connection con) {
+		if(con != null) {
+			try {
+				con.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	//DML인 경우 사용
+	public void release(PreparedStatement pstmt) {
+		if(pstmt != null) {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	//select인 경우 사용
+	public void release(PreparedStatement pstmt, ResultSet rs) {
+		if(rs != null) {
+			try {
+				rs.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		if(pstmt != null) {
+			try {
+				pstmt.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	//동쪽영역에 사용자가 선택한 레코드 1건을 출력한다!
+	public void getDetail(String[] record) {
+		t_title2.setText(record[1]);
+		t_writer2.setText(record[2]);
+		t_content2.setText(record[3]);
 		
+		//이미지처리
+		File file=new File(dir+"/"+record[4]);
+		try {
+			detailImage=ImageIO.read(file);
+			p_preview2.repaint();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static void main(String[] args) {

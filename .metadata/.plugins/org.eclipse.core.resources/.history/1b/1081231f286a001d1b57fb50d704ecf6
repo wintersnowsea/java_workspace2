@@ -1,6 +1,0 @@
-package res;
-
-//자바에서 이미지를 얻는 방법은 번거로운 Toolkit만 있는것
-public class HeroControl {
-
-}

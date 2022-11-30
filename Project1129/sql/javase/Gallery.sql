@@ -1,7 +1,7 @@
 select table_name from user_tables
 --sql 문도 깃허브에 올라가서 확인이 가능하다
 
-<오라클 테이블>
+--<오라클 테이블>
 제목 title varchar2(100)
 작성자 writer varchar2(30)
 내용 content clob
