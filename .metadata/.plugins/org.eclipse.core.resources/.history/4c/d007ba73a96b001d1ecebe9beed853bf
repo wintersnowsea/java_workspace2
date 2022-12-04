@@ -1,8 +1,0 @@
-package page;
-
-//자바언어에서 DBMS를 연동해보는 실습
-public class OrableTest {
-	public static void main(String[] args) {
-		
-	}
-}
