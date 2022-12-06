@@ -7,28 +7,30 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.Year;
 import java.util.Calendar;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 public class DiaryMain extends JFrame implements ActionListener{
 	DBManager dbManager=DBManager.getInstance(); //싱글톤
+	DiaryDao diaryDAO=new DiaryDao();
 	
 	//서쪽 영역
 	JPanel p_west;
-	JComboBox box_yy; //년
-	JComboBox box_mm; //월
-	JComboBox box_dd; //일
+	JComboBox<String> box_yy; //년
+	JComboBox<String> box_mm; //월
+	JComboBox<String> box_dd; //일
 	JTextArea area;
 	JScrollPane scroll;
-	JComboBox box_icon; //다이어리에 사용할 아이콘
+	JComboBox<String> box_icon; //다이어리에 사용할 아이콘
 	JButton bt_regist; //등록 및 수정
 	JButton bt_del; //삭제
 	
@@ -55,12 +57,12 @@ public class DiaryMain extends JFrame implements ActionListener{
 	public DiaryMain() {
 		//서쪽영역
 		p_west=new JPanel();
-		box_yy=new JComboBox();
-		box_mm=new JComboBox();
-		box_dd=new JComboBox();
+		box_yy=new JComboBox<String>();
+		box_mm=new JComboBox<String>();
+		box_dd=new JComboBox<String>();
 		area=new JTextArea();
 		scroll=new JScrollPane(area);
-		box_icon=new JComboBox();
+		box_icon=new JComboBox<String>();
 		bt_regist=new JButton("등록");
 		bt_del=new JButton("삭제");
 		
@@ -150,13 +152,16 @@ public class DiaryMain extends JFrame implements ActionListener{
 				calculate();
 			}
 		});
+		
+		bt_regist.addActionListener(this); //regist에 귀 달기!
+		
 	}
 	
 	//요일 출력
 	public void createDayOfWeek() {
 		//7개를 생성하여 패널에 부착
 		for(int i=0;i<dayCells.length;i++) {
-			dayCells[i]=new DayCell(dayTitle[i],19,30,30); //배열에 담아놓자
+			dayCells[i]=new DayCell(dayTitle[i],"",19,30,30); //배열에 담아놓자
 			p_dayOfWeek.add(dayCells[i]);//화면에 부착
 		}
 	}
@@ -165,7 +170,7 @@ public class DiaryMain extends JFrame implements ActionListener{
 	public void createDayOfMonth() {
 		for(int i=0;i<dateCells.length;i++) {//층수
 			for(int a=0;a<dateCells[i].length;a++) { //호수
-				dateCells[i][a]=new DateCell("",12,45,15);
+				dateCells[i][a]=new DateCell(this,"","",12,45,15);
 				//패널에 부착
 				p_dayOfMonth.add(dateCells[i][a]);
 				
@@ -234,6 +239,37 @@ public class DiaryMain extends JFrame implements ActionListener{
 		//getStartDayOfWeek();
 		//getLastDayOfMonth();
 		printDate(); //날짜출력
+		//기록된 다이어리 출력
+		printLog();
+	}
+	
+	public void printLog() {
+		int yy=currentObj.get(Calendar.YEAR);
+		int mm=currentObj.get(Calendar.MONTH);
+		
+		List<Diary> diaryList=diaryDAO.selectAll(yy,mm); //현재 보고있는 연도, 현재 보고있는 월
+		System.out.println("등록된 다이어리 수는 "+diaryList.size());
+		
+		//현재 월의 모든 날짜를 대상으로 반복문 수행
+		for(int i=0;i<dateCells.length;i++) {
+			for(int a=0;a<dateCells[i].length;a++) {
+				if(dateCells[i][a].title.equals("")==false) { //숫자가 아닌 ""과 같은 문자열은 정수화시킬 수 없으므로 조건문으로 걸러내자!
+					int date=Integer.parseInt(dateCells[i][a].title);//날짜 숫자 추출하기
+					
+					
+					//불러온 데이터만큼...
+					for(int x=0;x<diaryList.size();x++) {
+						Diary obj=diaryList.get(x); //다이어리 한건 추출
+						if(date == obj.getDd()) {
+							//해당 셀에 데이터 표현
+							dateCells[i][a].color=Color.CYAN;
+							dateCells[i][a].content=obj.getContent();
+						}
+					}
+				}
+			}
+		}
+		p_dayOfMonth.repaint();
 	}
 	
 	//데이터베이스와 관련된 쿼리로직을 중복 정의하지 않기 위해
@@ -243,6 +279,30 @@ public class DiaryMain extends JFrame implements ActionListener{
 		//쿼리문의 재사용때문에 이곳에 로직을 짜서는 안된다
 		//이곳에 사용 시 일회용일 뿐!
 		
+		Diary d=new Diary(); //Diary DTO 생성! (Empty 상태 = 텅 빈 상태)
+		
+		System.out.println("호출 전 d"+d);
+		
+		//UnBoxing(객체형이 기본자료형으로 변경되는 것)
+		String yy=(String)box_yy.getSelectedItem();
+		String mm=(String)box_mm.getSelectedItem();
+		String dd=(String)box_dd.getSelectedItem();
+		
+		String content=area.getText();
+		String icon=(String)box_icon.getSelectedItem();
+		
+		//레코드 한건 채워넣기
+		d.setYy(Integer.parseInt(yy));
+		d.setMm(Integer.parseInt(mm));
+		d.setDd(Integer.parseInt(dd));
+		d.setContent(content);
+		d.setIcon(icon);
+		
+		int result=diaryDAO.insert(d);
+		if(result>0) { //성공이라면
+			JOptionPane.showMessageDialog(this, "등록성공");
+			printLog();
+		}
 	}
 	
 	@Override
@@ -253,6 +313,23 @@ public class DiaryMain extends JFrame implements ActionListener{
 		}else if(obj==bt_del) {
 			
 		}
+	}
+	
+	//셀을 선택 시 콤보박스의 값 변경
+	public void setDateInfo(String title) {
+		//콤보박스에 아이템을 누적하지 말고 싹 지운상태에서 추가
+		box_yy.removeAllItems();
+		box_mm.removeAllItems();
+		box_dd.removeAllItems();
+		
+		int yy=currentObj.get(Calendar.YEAR);
+		int mm=currentObj.get(Calendar.MONTH);
+		
+		
+		box_yy.addItem(Integer.toString(yy)); // int --> Object(boxing)
+		box_mm.addItem(Integer.toString(mm)); // int --> Object(boxing)
+		box_dd.addItem(title);
+		
 	}
 	
 	public static void main(String[] args) {

@@ -14,9 +14,11 @@ import javax.swing.border.LineBorder;
 //날짜에 사용하기 위한 셀
 public class DateCell extends Cell {
 	Color color=Color.white;
+	DiaryMain diaryMain;
 	
-	public DateCell(String title, int fontSize, int x, int y) {
-		super(title, fontSize, x, y);
+	public DateCell(DiaryMain diaryMain, String title, String content, int fontSize, int x, int y) {
+		super(title, content, fontSize, x, y);
+		this.diaryMain=diaryMain;
 		Border border=new LineBorder(Color.darkGray);
 		setBorder(border);
 		
@@ -24,6 +26,8 @@ public class DateCell extends Cell {
 			public void mouseClicked(MouseEvent e) {
 				if(color==Color.WHITE) {
 					color=Color.pink;
+					//콤보박스에 날짜채워넣기!
+					diaryMain.setDateInfo(DateCell.this.title);
 				}else {
 					color=Color.white;
 				}
@@ -43,6 +47,9 @@ public class DateCell extends Cell {
 		Font font=new Font("Verdava", Font.BOLD, fontSize);
 		g2.setFont(font);
 		g2.setColor(Color.black);
-		g2.drawString(title, x, y);
+		g2.drawString(title, x, y); //날짜 그리기
+		g2.drawString(content, x-30, y+20); //내용 그리기
+		
+		
 	}
 }

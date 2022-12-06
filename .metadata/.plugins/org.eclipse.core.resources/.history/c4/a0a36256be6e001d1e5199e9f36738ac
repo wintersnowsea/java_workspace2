@@ -1,9 +1,0 @@
-package tablemodel;
-
-import javax.swing.table.AbstractTableModel;
-
-//JTable은 유지 보수성을 높이기 위해, 데이터와 디자인을 분리시키기 위한 방법을 제공해주며
-//이때 사용되는 객체가 바로 TableModel이다
-public class EmpModel extends AbstractTableModel{
-	
-}

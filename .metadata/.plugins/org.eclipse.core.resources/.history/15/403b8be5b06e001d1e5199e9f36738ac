@@ -1,7 +1,0 @@
-package tablemodel;
-
-import javax.swing.JTable;
-
-public class AppMain {
-JTable table;
-}

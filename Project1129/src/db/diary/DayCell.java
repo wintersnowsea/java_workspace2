@@ -10,8 +10,8 @@ public class DayCell extends Cell {
 
 	//DayCell 생성시 요일을 넘겨 받아 보관해 놓자
 	//paintComponent 메서드가 그려야 하므로, 변수는 멤버변수로 존재해야한다
-	public DayCell(String title, int fontSize, int x, int y) {
-		super(title, fontSize, x, y);
+	public DayCell(String title, String content, int fontSize, int x, int y) {
+		super(title, content, fontSize, x, y);
 	}
 	
 	@Override
