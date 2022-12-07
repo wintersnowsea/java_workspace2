@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -39,6 +41,7 @@ import com.edu.shop.model.repository.SubCategoryDAO;
 import com.edu.shop.model.repository.TopCategoryDAO;
 import com.edu.shop.model.table.ProductModel;
 import com.edu.shop.util.DBManager;
+import com.edu.shop.util.ImageManager;
 import com.edu.shop.util.StringUtil;
 
 public class AdminMain extends JFrame implements ActionListener{
@@ -84,11 +87,17 @@ public class AdminMain extends JFrame implements ActionListener{
 	JButton bt_del; //삭제 버튼
 	
 	//하위카테고리 선택시 담아놓을 pk(subcategory_idx)
-	List<Integer> subIdxList=new ArrayList();
+	List<Integer> subIdxList=new ArrayList<Integer>();
+	
+	//동쪽영역용
+	List<Integer> subIdxList2=new ArrayList<Integer>();
 	
 	String dir="C:/java_workspace2/data/shop/product/";
 	String filename; //서쪽영역에서 미리보기될 이미지명
 	Image image; //서쪽영역에서 미리보기될 이미지
+	Image image2; //동쪽영역에서 미리보게 될 이미지
+	
+	Product currentProduct; //현재보고있는 상품 -> 내가 선택한 상품
 	
 	public AdminMain() {
 		topCategoryDAO=new TopCategoryDAO();
@@ -107,7 +116,6 @@ public class AdminMain extends JFrame implements ActionListener{
 			protected void paintComponent(Graphics g) {
 				Graphics2D g2=(Graphics2D)g;
 				g2.drawImage(image, 0, 0, 140, 140, AdminMain.this);
-				
 			}
 		};
 		t_url=new JTextField();
@@ -165,7 +173,13 @@ public class AdminMain extends JFrame implements ActionListener{
 		t_name2=new JTextField();
 		t_brand2=new JTextField();
 		t_price2=new JTextField();
-		preview2=new JPanel();
+		preview2=new JPanel() {
+			protected void paintComponent(Graphics g) {
+				Graphics2D g2=(Graphics2D)g;
+				g2.clearRect(0, 0, 140, 140);//지우고
+				g2.drawImage(image2, 0, 0, 140, 140, AdminMain.this); //그리자
+			}
+		};
 		t_url2=new JTextField();
 		bt_preview2=new JButton("가져오기");
 		bt_edit=new JButton("수정");
@@ -210,6 +224,7 @@ public class AdminMain extends JFrame implements ActionListener{
 			}
 		});
 		
+		//서쪽 영역에 이벤트 처리
 		box_top.addItemListener(new ItemListener() {
 			
 			public void itemStateChanged(ItemEvent e) {
@@ -219,7 +234,22 @@ public class AdminMain extends JFrame implements ActionListener{
 					//System.out.println("topCategory_idx : "+topCategory_idx);
 					
 					//하위 카테고리 출력
-					getSupList(topCategory_idx);
+					getSupList(box_sub, subIdxList, topCategory_idx);
+				}
+			}
+		});
+		
+		//동쪽 영역에 이벤트처리
+		box_top2.addItemListener(new ItemListener() {
+			
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange()==ItemEvent.SELECTED) {
+					//System.out.println(e.getItem());
+					int topCategory_idx=topCategoryDAO.getTopCategoryIdx((String)e.getItem());
+					//System.out.println("topCategory_idx : "+topCategory_idx);
+					
+					//하위 카테고리 출력
+					getSupList(box_sub2, subIdxList2, topCategory_idx);
 				}
 			}
 		});
@@ -232,42 +262,118 @@ public class AdminMain extends JFrame implements ActionListener{
 		bt_edit.addActionListener(this);
 		bt_del.addActionListener(this);
 		
+		//마우스리스너 연결
+		table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				//이 정보로 (1차원의 ArrayList의 index)층을 접근할 수 있다
+				int row=table.getSelectedRow(); //유저가 선택한 행
+				//int col=table.getSelectedColumn(); //유저가 선택한 열
+				//System.out.println("선택한 row는 "+row+", col은 "+col);
+				String product_idx=(String)table.getValueAt(row, 2); //호수는 2로 고정
+				System.out.println(product_idx);
+				getDetail(Integer.parseInt(product_idx));
+			}
+		});
+		
 	}
+	
+	//선택한 레코드 한건 가져오기(결과를 우측에 반영)
+	public void getDetail(int product_idx) {
+		Product product=productDAO.select(product_idx);
+		currentProduct=product; //현재보고있는 상품 대입
+		System.out.println(product);
+		
+		//우측 영역에 반영하기
+		
+		//1) TopCategory DTO에 들어있는 카테고리 이름을 추출
+		SubCategory subCategory=product.getSubcategory();
+		TopCategory topCategory=subCategory.getTopCategory();
+		String topName=topCategory.getTopcategory_name();
+		
+		//2) 추출한 이름이 콤보박스에 몇번째 한글과 동일한지 그 index 알아맞추기
+		for(int i=0;i<box_top2.getItemCount();i++) {
+			String value=box_top2.getItemAt(i); //0 : 안내, 1: 상의, 2: 하의...
+			if(value.equals(topName)) { //동일한 이름이 발견되면
+				System.out.println(topName+"이 "+i+" 번째 index에서 발견됨");
+				//선택하길 원하는 index
+				box_top2.setSelectedIndex(i); //상위카테고리idx
+			}
+		}
+		
+		getSupList(box_sub2, subIdxList2, topCategory.getTopcategory_idx());
+		
+		//하위카테고리 이름추출
+		String subName=subCategory.getSubcategory_name();
+		for(int i=0;i<box_sub2.getItemCount();i++) {
+			String value=box_sub2.getItemAt(i); //0 : 안내, 1: 상의, 2: 하의...
+
+			if(value.equals(subName)) { //동일한 이름이 발견되면
+				System.out.println(subName+"이 "+i+" 번째 index에서 발견됨");
+				//선택하길 원하는 index
+				box_sub2.setSelectedIndex(i); //하위카테고리idx
+			}
+		}
+		
+		//상품명, 브랜드, 가격
+		t_name2.setText(product.getProduct_name());
+		t_brand2.setText(product.getBrand());
+		t_price2.setText(Integer.toString(product.getPrice()));
+		
+		//현재 선택한 사진
+		filename=product.getFilename();
+		
+		//우측영역에 사진 그리기
+		try {
+			image2=ImageIO.read(new File(dir+product.getFilename()));
+			preview2.repaint();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	
 	//상위 카테고리 가져오기
 	public void getTopList() {
 		List<TopCategory> topList=topCategoryDAO.selectAll();
 		
+		//서쪽 영역
 		box_top.addItem("카테고리 선택 ▼");
 		for(TopCategory topCategory : topList) {
 			box_top.addItem(topCategory.getTopcategory_name());
 		}
+
+		//동쪽 영역
+		box_top2.addItem("카테고리 선택 ▼");
+		for(TopCategory topCategory : topList) {
+			box_top2.addItem(topCategory.getTopcategory_name());
+		}
 	}
 	
 	//하위 카테고리 가져오기
-	public void getSupList(int topCategory_idx) {
+	public void getSupList(JComboBox box, List list, int topCategory_idx) {
 		//하이-> 청바지,반바지, 면바지,
 		List<SubCategory> subList=subCategoryDAO.selectByTopCategory(topCategory_idx);
 		//System.out.println("subList.size() : "+subList.size());
 		
 		//기존 아이템 싹 지우기
-		box_sub.removeAllItems();
-		subIdxList.removeAll(subIdxList);
+		box.removeAllItems(); //서쪽이 될지 동쪽이 될지 알 수 없음
+		list.removeAll(list); //서쪽이 될지 동쪽이 될지 알 수 없음
 		
-		box_sub.addItem("하위 카테고리▼");
+		box.addItem("하위 카테고리▼");
 		//해당 index에서 요소로 들어있는 DTO꺼내기!
 		for(int i=0;i<subList.size();i++) {
 			SubCategory subCategory=subList.get(i);
-			box_sub.addItem(subCategory.getSubcategory_name());			
+			box.addItem(subCategory.getSubcategory_name());			
 			//한글로된 아이템 이름만 출력하지 말고 해당 pk도 보관하자!
-			subIdxList.add(subCategory.getSubcategory_idx());
+			list.add(subCategory.getSubcategory_idx());
 		}
-		//System.out.println("보관된 하위카테고리 idx 수는 "+subIdxList);
+		System.out.println("보관된 하위카테고리 idx 수는 "+list);
 	}
 	
 
 	
-	public boolean downLoad() {
+	public boolean downLoad(JTextField url_input) {
 		//로컬에 있는 이미지가 아닌 웹의 url상의 이미지를
 		//로컬로 수집한 후 보유하자
 		//finally에서 닫을 예정이므로 try문 밖으로 빼놓자
@@ -276,7 +382,7 @@ public class AdminMain extends JFrame implements ActionListener{
 		boolean flag=false;
 		
 		try {
-			URL url=new URL(t_url.getText());
+			URL url=new URL(url_input.getText());
 			//System.out.println(url);
 			is=url.openStream(); //InputStream:입력스트림의 최고 어버이
 			
@@ -322,24 +428,27 @@ public class AdminMain extends JFrame implements ActionListener{
 		return flag;
 	}
 	
-	public void preview() {
+	public void preview(JPanel canvas) {
 		
 		File file=new File(dir+filename);
 		
 		try {
-			image=ImageIO.read(file);
+			if(canvas==preview) {
+				image=ImageIO.read(file);
+			}else {
+				image2=ImageIO.read(file);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		preview.repaint(); //서쪽패널 다시그리기
+		canvas.repaint(); //서쪽패널 다시그리기
 	}
 	
 	//모든 상품 레코드 가져오기 (단, 하위카테고리와 조인된 상태로)
 	public void getProductList() {
-		List productList=productDAO.selectAll();
-		
-		
-		
+		//모델 업데이트, Jtable 업데이트
+		model.getProductList(); //db재생성
+		table.updateUI(); //테이블 업데이트
 	}
 	
 	//상품등록
@@ -367,9 +476,93 @@ public class AdminMain extends JFrame implements ActionListener{
 		int result=productDAO.insert(product);	//productDAO.insert(채워진 DTO);
 		if(result>0) {
 			JOptionPane.showMessageDialog(this, "등록성공");
+			getProductList();
+		}
+	}
+	
+	//선택한 상품 1건 삭제
+	public void del() {
+		if(currentProduct==null) {
+			JOptionPane.showMessageDialog(this, "선택된 상품이 없습니다\n먼저 상품을 선택해 주세요");
+		}else {
+			int op=JOptionPane.showConfirmDialog(this, "삭제하시겠습니까?");
+			if(op==JOptionPane.OK_OPTION) { //승인을 누르면
+				//파일삭제
+				boolean result=ImageManager.deleteFile(dir+currentProduct.getFilename());
+				
+				//db레코드삭제
+				if(result) {
+					int n=productDAO.delete(currentProduct.getProduct_idx());
+					if(n>0) {
+						JOptionPane.showMessageDialog(this, "삭제성공");
+						
+						//JTable은 ProductModel이 보유한 productList만 참조하고 있으므로
+						//갱신된 내용을 보여주려면 결국 productList가 다시 변경되어야한다
+						//따라서 db 다시 조회한 수 productList를 재설정하면 됨
+						//그 다음 JTable.updateUI();하면 변경된 내용을 보여줄 것임
+						getProductList();
+						currentProduct=null; //다시 아무것도 선택하지 않은 상태로 놓기(선택해제)
+						reset();
+					}
+				}
+			}
+		}
+	}
+	
+	public void reset() {
+		//콤보박스들 초기화
+		box_top2.setSelectedIndex(0);
+		box_sub2.setSelectedIndex(0);
+		
+		//상품정보 초기화
+		t_name2.setText("");
+		t_brand2.setText("");
+		t_price2.setText("");
+		image2=null;
+		preview2.repaint();
+	}
+	
+	//상품수정
+	public void update() {
+		//사용자가 파일 삭제를 원한다면
+		if(t_url2.getText().length()>15) {
+			System.out.println("사진교체를 원함");
+			boolean result=ImageManager.deleteFile(dir+filename);
+			if(result) {
+				downLoad(t_url2); //지정한 주소로 다운로드 진행
+				preview(preview2); //우측영역에 그림 보여주기
+			}
+		}else {
+			System.out.println("사진을 유지");
+			//파일 교체를 희망하지 않으면 기존의 이름을 유지
+			filename=currentProduct.getFilename();
+			
 		}
 		
-	}
+		//기존 파일 삭제 후 새로운 파일 적용
+		ImageManager.deleteFile(dir+filename);
+		System.out.println(dir+filename); //경로가 맞는 지
+		//db update
+		Product product=new Product();
+		SubCategory subCategory=new SubCategory();
+		product.setSubcategory(subCategory); //참조관계
+		
+//		subIdxList2.get(선택한 콤보박스의 index-1);
+		int subcategory_idx=subIdxList2.get(box_sub2.getSelectedIndex()-1);
+		subCategory.setSubcategory_idx(subcategory_idx);
+		product.setProduct_name(t_name2.getText());
+		product.setBrand(t_brand2.getText());
+		product.setPrice(Integer.parseInt(t_price2.getText()));
+		product.setFilename(filename);
+		product.setProduct_idx(currentProduct.getProduct_idx());
+		
+		int n=productDAO.update(product);
+		if(n>0) {
+			//refresh
+			getProductList();
+		}
+		
+	} 
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -379,19 +572,27 @@ public class AdminMain extends JFrame implements ActionListener{
 		if(obj.equals(bt_regist)) {
 			regist();
 		}else if(obj.equals(bt_preview)) {
-			if(downLoad()) { //다운로드메서드가 참이라면
-				preview();
+			if(downLoad(t_url)) { //다운로드메서드가 참이라면
+				preview(preview);
 			}else {
 				JOptionPane.showMessageDialog(this, "수집실패");
 			}
 		}else if(obj.equals(bt_search)) {
 			
 		}else if(obj.equals(bt_preview2)) {
-			
+			if(downLoad(t_url2)) { //다운로드메서드가 참이라면
+				preview(preview2);
+			}else {
+				JOptionPane.showMessageDialog(this, "수집실패");
+			}
 		}else if(obj.equals(bt_edit)) {
-			
+			if(currentProduct != null){ //선택한상품이 있다면
+				update(); //상품정보수정
+			}else {
+				JOptionPane.showMessageDialog(this, "수정하실 상품을 선택해주세요");
+			}
 		}else if(obj.equals(bt_del)) {
-			
+			del();
 		}	
 	}
 	

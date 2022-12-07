@@ -25,3 +25,11 @@ select s.subcategory_idx as subcategory_idx, subcategory_name,
  from subcategory s, product p
  where s.subcategory_idx=p.subcategory_idx;
  
+ --3개 테이블 조인
+ select t.topcategory_idx, topcategory_name --topcategory 가져오기
+ 	, s.subcategory_idx, subcategory_name --subcategory 가져오기
+ 	, product_idx, product_name, brand, price, filename --product 가져오기
+ from topcategory t, subcategory s, product p
+ where t.topcategory_idx = s.topcategory_idx
+ and s.subcategory_idx = p.subcategory_idx
+ and p.product_idx=1;

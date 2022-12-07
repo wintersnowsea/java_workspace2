@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.edu.shop.domain.SubCategory;
+import com.edu.shop.domain.TopCategory;
 import com.edu.shop.util.DBManager;
 
 //이 클래스는 오직 SubCategory 테이블에 대한 CRUD만을 담당
@@ -37,8 +38,12 @@ public class SubCategoryDAO {
 			//따라서 close() 가능
 			while(rs.next()) {
 				SubCategory subCategory=new SubCategory(); //비어있음
+				//has a 관계로 보유한 TopCategoryDTO도 생성하자!
+				TopCategory topCategory=new TopCategory();
+				subCategory.setTopCategory(topCategory); //드디어 연결
+				
 				subCategory.setSubcategory_idx(rs.getInt("subcategory_idx")); //pk
-				subCategory.setTopcategory_idx(topcategory_idx); //fk
+				topCategory.setTopcategory_idx(topcategory_idx); //fk
 				subCategory.setSubcategory_name(rs.getString("subcategory_name"));
 				list.add(subCategory);
 			}

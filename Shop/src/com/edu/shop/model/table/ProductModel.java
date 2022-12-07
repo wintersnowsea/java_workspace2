@@ -1,6 +1,7 @@
 package com.edu.shop.model.table;
 
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -10,11 +11,20 @@ import com.edu.shop.domain.Product;
 public class ProductModel extends AbstractTableModel{
 	AdminMain adminMain;
 	List<Product> productList;
+	Vector<String> column=new Vector<String>();
 	
 	//넘겨받는 이유는? 기존의 AdminMain이 보유중인 각종 객체들을 사용하기 위함
 	//(ProductDAO, 등등 필요한 것이 많음)
 	public ProductModel(AdminMain adminMain) {
 		this.adminMain=adminMain;
+		column.add("subcategory_idx");
+		column.add("하위카테고리명");
+		column.add("상품코드");
+		column.add("상품명");
+		column.add("브랜드");
+		column.add("가격");
+		column.add("이미지명");
+		
 		getProductList();
 	}
 	
@@ -63,6 +73,11 @@ public class ProductModel extends AbstractTableModel{
 		}
 		
 		return value;
+	}
+	
+	//컬럼제목
+	public String getColumnName(int col) {
+		return column.elementAt(col);
 	}
 	
 }

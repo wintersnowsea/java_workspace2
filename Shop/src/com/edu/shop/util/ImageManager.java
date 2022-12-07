@@ -1,11 +1,11 @@
 package com.edu.shop.util;
 
 import java.awt.Image;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 public class ImageManager {
@@ -70,5 +70,12 @@ public class ImageManager {
 			return image;
 		}
 		
-
+		//이미지삭제
+		public static boolean deleteFile(String path) {
+			File file=new File(path);
+			
+			boolean result=file.delete();
+			
+			return result;
+		}
 }
