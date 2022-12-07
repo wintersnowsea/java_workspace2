@@ -12,6 +12,7 @@
 		<item key="incremental" value="false"/>
 		<item key="isRegEx" value="false"/>
 		<list key="findhistory">
+			<item value="select s.subcategory_idx, subcategory_name,"/>
 			<item value="showHide"/>
 			<item value="selected_id"/>
 			<item value="int selected_id"/>
