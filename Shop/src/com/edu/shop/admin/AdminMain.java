@@ -93,7 +93,8 @@ public class AdminMain extends JFrame implements ActionListener{
 	List<Integer> subIdxList2=new ArrayList<Integer>();
 	
 	String dir="C:/java_workspace2/data/shop/product/";
-	String filename; //서쪽영역에서 미리보기될 이미지명
+	StringBuilder filename = new StringBuilder(); //서쪽영역에서 미리보기될 이미지명
+	StringBuilder filename2 = new StringBuilder(); //동쪽영역에서 미리보기될 이미지명
 	Image image; //서쪽영역에서 미리보기될 이미지
 	Image image2; //동쪽영역에서 미리보게 될 이미지
 	
@@ -320,8 +321,9 @@ public class AdminMain extends JFrame implements ActionListener{
 		t_price2.setText(Integer.toString(product.getPrice()));
 		
 		//현재 선택한 사진
-		filename=product.getFilename();
-		
+		//filename=new StringBuilder(product.getFilename());
+		String filename = product.getFilename();
+		System.out.println(filename);
 		//우측영역에 사진 그리기
 		try {
 			image2=ImageIO.read(new File(dir+product.getFilename()));
@@ -373,7 +375,7 @@ public class AdminMain extends JFrame implements ActionListener{
 	
 
 	
-	public boolean downLoad(JTextField url_input) {
+	public boolean downLoad(JTextField url_input, StringBuilder filename) {
 		//로컬에 있는 이미지가 아닌 웹의 url상의 이미지를
 		//로컬로 수집한 후 보유하자
 		//finally에서 닫을 예정이므로 try문 밖으로 빼놓자
@@ -389,10 +391,10 @@ public class AdminMain extends JFrame implements ActionListener{
 			//파일출력스트림이 생성할 빈 파일의 이름을 결정짓자
 			String ext=StringUtil.getExtend(url.toString());
 			
-			filename=StringUtil.createFilename(url.toString());
+			filename.append(StringUtil.createFilename(url.toString()));
 			//System.out.println(ext);
-			fos=new FileOutputStream(dir+filename);
-			System.out.println(filename);
+			fos=new FileOutputStream(dir+filename.toString());
+			System.out.println(filename.toString());
 			
 			int data=-1;
 			while(true) {
@@ -428,9 +430,10 @@ public class AdminMain extends JFrame implements ActionListener{
 		return flag;
 	}
 	
-	public void preview(JPanel canvas) {
-		
-		File file=new File(dir+filename);
+	public void preview(JPanel canvas,StringBuilder filename) {
+		System.out.println(filename.toString());
+		System.out.println(dir+filename.toString());
+		File file=new File(dir+filename.toString());
 		
 		try {
 			if(canvas==preview) {
@@ -471,7 +474,7 @@ public class AdminMain extends JFrame implements ActionListener{
 		product.setProduct_name(product_name);
 		product.setBrand(brand);
 		product.setPrice(price);
-		product.setFilename(filename);
+		product.setFilename(filename.toString());
 		
 		int result=productDAO.insert(product);	//productDAO.insert(채워진 DTO);
 		if(result>0) {
@@ -520,28 +523,28 @@ public class AdminMain extends JFrame implements ActionListener{
 		t_price2.setText("");
 		image2=null;
 		preview2.repaint();
+		t_url2.setText("");
 	}
 	
 	//상품수정
 	public void update() {
 		//사용자가 파일 삭제를 원한다면
-		if(t_url2.getText().length()>15) {
+		boolean fileFlag = false;
+		if(t_url2.getText().length()>20) {
 			System.out.println("사진교체를 원함");
-			boolean result=ImageManager.deleteFile(dir+filename);
-			if(result) {
-				downLoad(t_url2); //지정한 주소로 다운로드 진행
-				preview(preview2); //우측영역에 그림 보여주기
-			}
+			
+			fileFlag = true;
 		}else {
 			System.out.println("사진을 유지");
 			//파일 교체를 희망하지 않으면 기존의 이름을 유지
-			filename=currentProduct.getFilename();
-			
+			//filename2=new StringBuilder(currentProduct.getFilename());
+			filename2.replace(0,filename.length(), currentProduct.getFilename());
+			fileFlag = false;
 		}
 		
 		//기존 파일 삭제 후 새로운 파일 적용
-		ImageManager.deleteFile(dir+filename);
-		System.out.println(dir+filename); //경로가 맞는 지
+		//ImageManager.deleteFile(dir+filename);
+		System.out.println(dir+filename2); //경로가 맞는 지
 		//db update
 		Product product=new Product();
 		SubCategory subCategory=new SubCategory();
@@ -553,13 +556,20 @@ public class AdminMain extends JFrame implements ActionListener{
 		product.setProduct_name(t_name2.getText());
 		product.setBrand(t_brand2.getText());
 		product.setPrice(Integer.parseInt(t_price2.getText()));
-		product.setFilename(filename);
+		product.setFilename(filename2.toString());
 		product.setProduct_idx(currentProduct.getProduct_idx());
 		
 		int n=productDAO.update(product);
 		if(n>0) {
-			//refresh
-			getProductList();
+			if(fileFlag) {
+				boolean result=ImageManager.deleteFile(dir+currentProduct.getFilename());
+				if(result) {//사용자가 입력해서 날짜로 변환된 filename이 필요
+					//refresh
+					getProductList();
+					filename2.replace(1, filename2.length(), "");
+					reset();
+				}
+			}
 		}
 		
 	} 
@@ -572,16 +582,16 @@ public class AdminMain extends JFrame implements ActionListener{
 		if(obj.equals(bt_regist)) {
 			regist();
 		}else if(obj.equals(bt_preview)) {
-			if(downLoad(t_url)) { //다운로드메서드가 참이라면
-				preview(preview);
+			if(downLoad(t_url, filename)) { //다운로드메서드가 참이라면
+				preview(preview,filename);
 			}else {
 				JOptionPane.showMessageDialog(this, "수집실패");
 			}
 		}else if(obj.equals(bt_search)) {
 			
 		}else if(obj.equals(bt_preview2)) {
-			if(downLoad(t_url2)) { //다운로드메서드가 참이라면
-				preview(preview2);
+			if(downLoad(t_url2, filename2)) { //다운로드메서드가 참이라면
+				preview(preview2,filename2);
 			}else {
 				JOptionPane.showMessageDialog(this, "수집실패");
 			}
