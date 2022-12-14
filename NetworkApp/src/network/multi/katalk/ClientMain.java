@@ -3,6 +3,8 @@ package network.multi.katalk;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import network.domain.ChatMember;
+
 public class ClientMain extends JFrame{
 	JPanel container;//전환될 페이지들을 안고 있을 최상위 패널
 	
@@ -13,6 +15,11 @@ public class ClientMain extends JFrame{
 	public static final int LOGINPAGE=0;
 	public static final int JOINPAGE=1;
 	public static final int CHATPAGE=2;
+	
+	//로그인 성공 시 담아 둘 사용자 정보
+	//이 클래스에 멤버변수로 선언한 이유는
+	//모든 page들이 이 클래스를 접근할 수 있기 때문 (공통클래스이기 때문)
+	ChatMember chatMember;
 	
 	public ClientMain() {
 		container=new JPanel();

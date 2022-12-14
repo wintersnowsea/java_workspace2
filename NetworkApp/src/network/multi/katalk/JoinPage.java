@@ -62,12 +62,24 @@ public class JoinPage extends Page{
 
 		setBackground(Color.YELLOW);
 		
+		//로그인버튼과 리스너 연결
+		bt_login.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				login();
+			}
+		});
+		
 		//회원가입버튼과 리스너연결
 		bt_join.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				regist();
 			}
 		});
+	}
+	
+	//로그인 페이지 보여주기
+	public void login() {
+		clientMain.showHide(clientMain.LOGINPAGE);
 	}
 	
 	public void regist() {

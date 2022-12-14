@@ -13,4 +13,6 @@ public interface ChatMemberDAO {
 	
 	public List selectAll(); //모든 레코드 가져오기
 	public ChatMember select(int chatmember_idx); //한건 가져오기 select~~~where~~idx
+	public ChatMember select(ChatMember chatMember); //로그인할때 사용할 메서드 ->최상위 인터페이스로 바꾸자
+	
 }
