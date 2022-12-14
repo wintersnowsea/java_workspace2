@@ -1,0 +1,16 @@
+
+-- mysql 테이블 생성
+create  table  chatmember(
+ chatmember_idx  int  primary key auto_increment
+, id  varchar(20)
+, pass  varchar(20)
+, name varchar(20)
+, regdate  timestamp  default  now()
+) default  character set utf8;
+
+
+--DBManamger
+String mysql_driver="com.mysql.jdbc.Driver";
+String mysql_url="jdbc:mysql://localhost:3306/javase?characterEncoding=utf-8";
+
+
